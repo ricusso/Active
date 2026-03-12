@@ -1,0 +1,126 @@
+<%- include('../partials/head', { title: 'Панель эксперта — Актив PRO' }) %>
+<style>
+
+main { padding: 32px 32px 56px; flex: 1; }
+
+.page-hdr { margin-bottom: 32px; }
+.page-hdr h1 { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 900; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; transition: all 0.3s; }
+.kpi-card:hover { border-color: var(--purple); transform: translateY(-4px); }
+.kpi-lbl { font-size: 11px; color: var(--text3); font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block; }
+.kpi-val { font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); }
+
+.dashboard-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+
+.section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 24px; }
+.section-title { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+.quest-item { display: flex; align-items: center; gap: 16px; padding: 12px; background: var(--surface2); border-radius: 12px; margin-bottom: 12px; border: 1px solid transparent; transition: all 0.2s; cursor: pointer; }
+.quest-item:hover { border-color: var(--pink); background: rgba(14, 165, 233,0.02); }
+.q-ico { width: 40px; height: 40px; border-radius: 10px; background: var(--surface3); display: flex; align-items: center; justify-content: center; color: var(--pink); }
+.q-info { flex: 1; }
+.q-name { font-size: 14px; font-weight: 700; }
+.q-stats { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+.btn-add { width: 100%; padding: 14px; background: rgba(255,255,255,0.03); border: 1px dashed var(--border); border-radius: 12px; color: var(--text3); font-weight: 800; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.btn-add:hover { border-color: var(--pink); color: var(--pink); }
+
+.notif-item { display: flex; gap: 12px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.notif-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.n-ava { width: 32px; height: 32px; border-radius: 50%; background: var(--purple); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 10px; color: #fff; }
+.n-msg { font-size: 12px; line-height: 1.4; color: var(--text2); }
+.n-msg b { color: var(--text); }
+.n-time { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+.blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.1; z-index: 0; pointer-events: none; }
+.blob-1 { width: 500px; height: 500px; background: var(--purple); top: -100px; right: -100px; }
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+<div class="blob blob-1"></div>
+<%- include('../partials/sidebar_mobile') %>
+<%- include('../partials/sidebar_desktop') %><div class="page-wrap"><div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Панель Эксперта</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div style="background:var(--surface2); padding:6px 12px; border-radius:50px; font-size:11px; font-weight:800; color:var(--green); border:1px solid rgba(110,231,160,0.2);">В сети</div>
+    </div>
+  </div>
+
+  <main>
+    <div class="page-hdr">
+      <h1>Добро пожаловать, <%= user.name %>!</h1>
+      <p style="color: var(--text2);">Вот краткий обзор ваших достижений и активности учеников</p>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <span class="kpi-lbl">Учеников</span>
+        <div class="kpi-val"><%= stats.students %></div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-lbl">Доход (мес)</span>
+        <div class="kpi-val"><%= stats.income %></div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-lbl">Активных Квестов</span>
+        <div class="kpi-val"><%= stats.activeQuests %></div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-lbl">Рейтинг</span>
+        <div class="kpi-val"><%= stats.rating %> ★</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="main-col">
+        <div class="section-card">
+          <div class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pink)" stroke-width="2.5"><path d="M12 22a8 8 0 0 1-8-8c0-5 8-12 8-12s8 7 8 12a8 8 0 0 1-8 8Z"/></svg>
+            Ваши квесты
+          </div>
+
+          <% if (activeQuests.length > 0) { %>
+            <% activeQuests.forEach(q => { %>
+              <div class="quest-item" onclick="location.href='/expert/quest-analytics'">
+                <div class="q-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22a8 8 0 0 1-8-8c0-5 8-12 8-12s8 7 8 12a8 8 0 0 1-8 8Z"/></svg></div>
+                <div class="q-info">
+                  <div class="q-name"><%= q.title %></div>
+                  <div class="q-stats"><%= q.duration_days %> дней • <%= q.category %></div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p style="color:var(--text3); font-size:13px; margin-bottom:20px;">У вас пока нет созданных квестов.</p>
+          <% } %>
+
+          <button class="btn-add" onclick="location.href='/expert/create-quest'">+ Создать новый квест</button>
+        </div>
+      </div>
+
+      <div class="side-col">
+        <div class="section-card">
+          <div class="section-title">Последние уведомления</div>
+
+          <div class="notif-item">
+            <div class="n-ava">L</div>
+            <div class="n-msg">Система Актив готова к работе. Настройте свой первый квест.</div>
+            <div class="n-time">Только что</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+</body>
+</html>

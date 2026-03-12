@@ -1,0 +1,21 @@
+<%- include('../partials/head', { title: '404 — Квест не найден' }) %>
+<style>
+:root { --bg: #0e0e12; --pink: #0ea5e9; --purple: #2563eb; --text: #f0f0f6; }
+
+.error-content { text-align: center; position: relative; z-index: 1; }
+h1 { font-family: 'Inter', sans-serif; font-size: 120px; margin: 0; background: linear-gradient(135deg, var(--pink), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 30px rgba(14, 165, 233,0.3)); line-height: 1; }
+p { font-size: 18px; margin: 20px 0 40px; opacity: 0.6; font-weight: 600; }
+.btn-home { background: linear-gradient(135deg, var(--pink), var(--purple)); color: #111; padding: 16px 32px; border-radius: 14px; text-decoration: none; font-weight: 800; transition: transform 0.2s; display: inline-block; }
+.btn-home:hover { transform: scale(1.05); }
+.blob { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, var(--pink), transparent 70%); filter: blur(80px); opacity: 0.15; z-index: 0; animation: float 10s infinite alternate; }
+@keyframes float { 0% { transform: translate(-20%, -20%); } 100% { transform: translate(20%, 20%); } }
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+<div class="blob"></div>
+<div class="error-content">
+  <h1>404</h1>
+  <p>Похоже, этот путь ведет в пустоту...</p>
+  <a href="/" class="btn-home">Вернуться на базу</a>
+</div>
+</body>
+</html>

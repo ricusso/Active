@@ -1,0 +1,97 @@
+<%- include('../partials/head', { title: 'Мои квесты' }) %>
+<style>
+
+main { flex: 1; padding: 32px 32px 56px; }
+
+.page-hdr{margin-bottom:32px;}
+.page-hdr h1{font-family:'Inter', sans-serif;font-size:32px;margin-bottom:8px; background:linear-gradient(120deg,var(--text) 60%,var(--pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
+
+.quest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
+
+.quest-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px;
+  position: relative; transition: all 0.3s ease; display: flex; flex-direction: column;
+}
+.quest-card:hover { border-color: var(--pink); transform: translateY(-5px); }
+
+.q-status-badge { position: absolute; top: 20px; right: 20px; padding: 4px 12px; border-radius: 50px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+.status-active { background: rgba(110,231,160,0.1); color: var(--green); }
+
+.q-title { font-family: 'Inter', sans-serif; font-size: 18px; margin-bottom: 12px; margin-top: 10px; }
+.q-progress-container { margin-top: auto; padding-top: 20px; }
+.q-progress-bar { height: 6px; background: var(--surface3); border-radius: 50px; overflow: hidden; margin-bottom: 10px; }
+.q-progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--pink)); border-radius: 50px; }
+.q-progress-text { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); font-weight: 800; text-transform: uppercase; }
+
+.btn-open { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; text-decoration: none; margin-top: 20px; display: block; }
+.btn-open:hover { border-color: var(--pink); color: var(--pink); }
+
+.empty-state { text-align: center; padding: 100px 20px; }
+.empty-state h2 { font-family: 'Inter', sans-serif; font-size: 20px; color: var(--text2); margin-bottom: 16px; }
+.btn-cta-empty { background: var(--pink); color: #111; padding: 14px 28px; border-radius: 14px; font-weight: 900; text-decoration: none; display: inline-block; }
+
+.blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.1; z-index: 0; pointer-events: none; }
+.blob-1 { width: 500px; height: 500px; background: var(--pink); top: -100px; right: -100px; }
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+<div class="blob blob-1"></div>
+<%- include('../partials/sidebar_mobile') %>
+<%- include('../partials/sidebar_desktop') %><div class="page-wrap"><div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Мои квесты</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="page-hdr">
+      <h1>Ваши испытания</h1>
+      <p style="color: var(--text2);">Прогресс по текущим программам саморазвития</p>
+    </div>
+
+    <% if (enrollments.length > 0) { %>
+      <div class="quest-grid">
+        <% enrollments.forEach(en => { %>
+          <div class="quest-card">
+            <span class="q-status-badge status-active"><%= en.status %></span>
+            <div style="font-size: 24px; margin-bottom: 10px;">🧪</div>
+            <h3 class="q-title"><%= en.Quest.title %></h3>
+
+            <div class="q-progress-container">
+              <div class="q-progress-bar">
+                <% let pct = Math.round((en.progress_days / en.Quest.duration_days) * 100); %>
+                <div class="q-progress-fill" style="width: <%= pct %>%;"></div>
+              </div>
+              <div class="q-progress-text">
+                <span>Прогресс: <%= pct %>%</span>
+                <span><%= en.progress_days %> / <%= en.Quest.duration_days %> дн.</span>
+              </div>
+            </div>
+
+            <a href="/quest-dashboard/<%= en.id %>" class="btn-open">Открыть панель</a>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <h2>У вас пока нет активных квестов</h2>
+        <p style="color: var(--text3); margin-bottom: 32px;">Выберите свое первое испытание в каталоге и начните путь к цели!</p>
+        <a href="/quests" class="btn-cta-empty">В каталог квестов</a>
+      </div>
+    <% } %>
+  </main>
+</div>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('success') === 'enrolled') {
+    window.showToast('Квест успешно оплачен и добавлен в ваши задачи!', 'success');
+  }
+</script>
+</body>
+</html>

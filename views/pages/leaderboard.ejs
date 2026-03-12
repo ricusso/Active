@@ -1,0 +1,67 @@
+<%- include('../partials/head', { title: 'Зал Славы' }) %>
+<style>
+
+main { padding: 32px 32px 56px; flex: 1; }
+
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:20px;margin:20px 0 60px;padding-bottom:20px;}
+.p-item{text-align:center;position:relative;}
+.p-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 15px;border:3px solid var(--border);position:relative;background:var(--surface);}
+.p-rank{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#111;}
+
+.p-1{order:2;margin-bottom:20px;} .p-1 .p-avatar{width:110px;height:110px;border-color:var(--gold);box-shadow:0 0 30px rgba(251,191,36,0.2);} .p-1 .p-rank{background:var(--gold);}
+.p-2{order:1;} .p-2 .p-avatar{border-color:var(--silver);} .p-2 .p-rank{background:var(--silver);}
+.p-3{order:3;} .p-3 .p-avatar{border-color:var(--bronze);} .p-3 .p-rank{background:var(--bronze);}
+
+.p-name{font-family:'Inter', sans-serif;font-size:14px;font-weight:700;margin-bottom:4px;}
+.p-xp{font-size:12px;color:var(--pink);font-weight:800;}
+
+.leader-table{background:var(--surface);border:1px solid var(--border);border-radius:24px;overflow:hidden; max-width: 900px; margin: 0 auto;}
+.l-row{display:grid;grid-template-columns:60px 1fr 120px 120px;padding:18px 24px;align-items:center;border-bottom:1px solid var(--border);transition:all .2s;}
+.l-row:hover{background:rgba(255,255,255,0.02);}
+.l-row.head{background:rgba(255,255,255,0.01);font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;}
+.l-num{font-family:'Inter', sans-serif;font-size:13px;color:var(--text3);}
+.l-user{display:flex;align-items:center;gap:12px;font-weight:700;}
+.l-ava{width:32px;height:32px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#111;}
+.l-league{font-size:10px;font-weight:900;text-transform:uppercase;padding:4px 10px;border-radius:50px;background:var(--surface3);color:var(--text2);}
+.league-gold{background:rgba(251,191,36,0.1);color:var(--gold);}
+.l-xp{font-family:'Inter', sans-serif;font-size:13px;font-weight:700;color:var(--pink);text-align:right;}
+
+:root {
+  --silver: #94a3b8; --bronze: #cd7f32;
+}
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+
+<%- include('../partials/sidebar_desktop') %>
+
+<div class="page-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Зал Славы</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="podium">
+      <div class="p-item p-2"><div class="p-avatar"></div><div class="p-rank">2</div><div class="p-name">Sofi_Pro</div><div class="p-xp">18,400 XP</div></div>
+      <div class="p-item p-1"><div class="p-avatar"></div><div class="p-rank">1</div><div class="p-name">Max_Master</div><div class="p-xp">24,150 XP</div></div>
+      <div class="p-item p-3"><div class="p-avatar"></div><div class="p-rank">3</div><div class="p-name">DevRunner</div><div class="p-xp">15,900 XP</div></div>
+    </div>
+
+    <div class="leader-table">
+      <div class="l-row head"><div>МЕСТО</div><div>ИГРОК</div><div>ЛИГА</div><div style="text-align:right">XP</div></div>
+      <div class="l-row"><div class="l-num">4</div><div class="l-user"><div class="l-ava">АК</div><%= user ? user.name : 'Gamer' %> (Вы)</div><div><span class="l-league league-gold">Золото</span></div><div class="l-xp">12,820</div></div>
+      <div class="l-row"><div class="l-num">5</div><div class="l-user"><div class="l-ava" style="background:var(--pink)">BM</div>Be_More</div><div><span class="l-league league-gold">Золото</span></div><div class="l-xp">11,400</div></div>
+      <div class="l-row"><div class="l-num">6</div><div class="l-user"><div class="l-ava" style="background:var(--text3)">JN</div>J_Night</div><div><span class="l-league">Серебро</span></div><div class="l-xp">9,200</div></div>
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+</body>
+</html>

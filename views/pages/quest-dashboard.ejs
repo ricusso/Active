@@ -1,0 +1,236 @@
+<%- include('../partials/head', { title: enrollment.Quest.title }) %>
+<style>
+
+body{overflow:hidden;}
+
+.page-wrap{height:100vh; overflow:hidden; display:flex; flex-direction:column;}
+
+.topbar{
+  height:64px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 32px; background:var(--surface);
+}
+.quest-meta{display:flex;align-items:center;gap:16px;}
+.q-tag{background:rgba(14, 165, 233,0.07); color:var(--pink); font-size:10px; font-weight:800; padding:4px 10px; border-radius:50px; text-transform:uppercase; border:1px solid rgba(14, 165, 233,0.2);}
+.q-title{font-family:'Inter', sans-serif; font-size:16px; font-weight:700;}
+.progress-wrap{display:flex;align-items:center;gap:12px;}
+.p-text{font-size:12px;font-weight:800;color:var(--text2);}
+.p-bar{width:150px;height:6px;background:var(--surface3);border-radius:50px;overflow:hidden;}
+.p-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--pink));border-radius:50px; transition: width 0.5s ease;}
+
+.dashboard-grid{display:grid;grid-template-columns:1fr 400px;flex:1;overflow:hidden;}
+
+.task-panel{padding:32px;overflow-y:auto;}
+.day-header{font-family:'Inter', sans-serif;font-size:28px;font-weight:900;margin-bottom:8px;}
+.day-sub{color:var(--text2);font-size:14px;font-weight:600;margin-bottom:32px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;}
+.card-title{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.card-title svg{color:var(--pink);}
+.task-desc{font-size:15px;color:var(--text);line-height:1.7;}
+.task-desc ul{margin-top:12px;padding-left:20px;color:var(--text2);}
+.task-desc li{margin-bottom:8px;}
+
+.upload-zone{
+  border:2px dashed rgba(255,255,255,0.1);border-radius:16px;padding:40px 20px;
+  text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);
+}
+.upload-zone:hover{border-color:var(--pink);background:rgba(14, 165, 233,0.02);}
+.upload-zone.done { border-color: var(--green); background: rgba(110,231,160,0.05); }
+.uz-ico{width:64px;height:64px;background:var(--surface3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--pink);}
+.uz-title{font-size:16px;font-weight:800;margin-bottom:6px;}
+.uz-sub{font-size:12px;color:var(--text3);font-weight:600;}
+
+.chat-panel{border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;height:100%;}
+.chat-hdr{
+  padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;
+}
+.ch-avatar{width:42px;height:42px;border-radius:12px;overflow:hidden;position:relative;}
+.ch-avatar img{width:100%;height:100%;object-fit:cover;}
+.ch-online{position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;background:var(--green);border:2px solid var(--surface);border-radius:50%;}
+.ch-info h3{font-size:14px;font-weight:800;margin-bottom:2px;}
+.ch-info p{font-size:11px;color:var(--green);font-weight:700;}
+
+.chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;}
+.msg{display:flex;gap:10px;max-width:85%;}
+.msg.expert{align-self:flex-start;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.m-bubble{padding:12px 16px;border-radius:14px;font-size:13px;line-height:1.5;}
+.msg.expert .m-bubble{background:var(--surface2);border:1px solid var(--border);border-top-left-radius:4px;}
+.msg.user .m-bubble{background:linear-gradient(135deg,var(--purple),var(--pink));color:#111;font-weight:600;border-top-right-radius:4px;}
+.m-time{font-size:9px;color:var(--text3);margin-top:6px;text-align:right;}
+
+.chat-input{padding:20px;border-top:1px solid var(--border);background:var(--surface);}
+.ci-wrap{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;}
+.ci-wrap input{flex:1;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:13px;outline:none;padding:0 10px;}
+.btn-send{background:var(--pink);border:none;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#111;cursor:pointer;transition:transform .2s;}
+.btn-send:hover{transform:scale(1.05);}
+
+.btn-checkin { width: 100%; padding: 18px; background: var(--pink); color: #111; border: none; border-radius: 16px; font-weight: 900; font-size: 16px; cursor: pointer; margin-top: 24px; transition: all 0.3s; }
+.btn-checkin:disabled { background: var(--surface3); color: var(--text3); cursor: not-allowed; }
+
+@media (max-width: 1024px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .chat-panel { height: 400px; border-left: none; border-top: 1px solid var(--border); }
+}
+</style>
+<body class="focus-mode">
+
+<%- include('../partials/sidebar_desktop') %><div class="page-wrap"><div class="topbar">
+    <div class="quest-meta">
+      <div class="q-tag"><%= enrollment.Quest.creator_type === 'expert' ? 'Premium' : 'Community' %></div>
+      <div class="q-title"><%= enrollment.Quest.title %></div>
+    </div>
+    <div class="progress-wrap">
+      <% let pct = Math.round((enrollment.progress_days / enrollment.Quest.duration_days) * 100); %>
+      <span class="p-text" id="progText">День <%= enrollment.progress_days %> из <%= enrollment.Quest.duration_days %></span>
+      <div class="p-bar"><div class="p-fill" id="progFill" style="width: <%= pct %>%;"></div></div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="task-panel">
+      <div class="day-header">День <%= enrollment.progress_days + 1 %>: <%= task.title %></div>
+      <div class="day-sub">Дисциплина — это мост между целью и достижением.</div>
+
+      <div class="card">
+        <div class="card-title">Ваш прогресс по дням</div>
+        <div class="days-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 10px; margin-bottom: 20px;">
+          <% for(let i=1; i<=enrollment.Quest.duration_days; i++) { %>
+            <div class="day-cell <%= i <= enrollment.progress_days ? 'done' : i === enrollment.progress_days + 1 ? 'current' : '' %>" 
+                 style="height: 40px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; transition: all 0.3s;
+                 <%= i <= enrollment.progress_days ? 'background: rgba(110,231,160,0.15); color: var(--green); border-color: var(--green);' : i === enrollment.progress_days + 1 ? 'background: var(--pink-soft); color: var(--pink); border-color: var(--pink);' : 'color: var(--text3);' %>">
+              <%= i %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Задание на сегодня
+        </div>
+        <div class="task-desc">
+          <%= task.description %>
+          <br><br>
+          <b>Ваш план на сегодня:</b>
+          <ul>
+            <li>Выполните основные условия квеста.</li>
+            <li>Зафиксируйте результат (фото или видео).</li>
+            <li>Отметьтесь в системе, чтобы получить XP.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" id="uploadCard">
+        <div class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Фиксация результата
+        </div>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInp').click()">
+          <div class="uz-ico">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="uz-title" id="uzTitle">Загрузить отчет</div>
+          <div class="uz-sub">Нажмите для выбора файла</div>
+          <input type="file" id="fileInp" style="display:none;">
+        </div>
+
+        <%
+          const today = new Date().toDateString();
+          const last = enrollment.last_checkin ? new Date(enrollment.last_checkin).toDateString() : null;
+          const isDoneToday = today === last;
+        %>
+        <button class="btn-checkin" id="checkInBtn" <%= isDoneToday ? 'disabled' : '' %>>
+          <%= isDoneToday ? 'Выполнено сегодня 🎉' : 'Я выполнил задание' %>
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-panel">
+      <div class="chat-hdr">
+        <div class="ch-avatar">
+          <div style="background: var(--purple); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff;">L</div>
+          <div class="ch-online"></div>
+        </div>
+        <div class="ch-info">
+          <h3>Поддержка квеста</h3>
+          <p>В сети</p>
+        </div>
+      </div>
+
+      <div class="chat-msgs" id="chatContainer">
+        <div class="msg expert">
+          <div class="m-bubble">Привет! Как продвигается твой путь в квесте "<%= enrollment.Quest.title %>"? Жду твой отчет! 🚀</div>
+          <div class="m-time">Сегодня</div>
+        </div>
+      </div>
+
+      <div class="chat-input">
+        <div class="ci-wrap">
+          <input type="text" placeholder="Написать сообщение...">
+          <button class="btn-send"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  const sb = document.getElementById('sidebar');
+  if(sb) sb.classList.add('collapsed');
+
+  const checkInBtn = document.getElementById('checkInBtn');
+  const progText = document.getElementById('progText');
+  const progFill = document.getElementById('progFill');
+  const uploadZone = document.getElementById('uploadZone');
+  const uzTitle = document.getElementById('uzTitle');
+
+  document.getElementById('fileInp').addEventListener('change', function(e) {
+    if(this.files && this.files[0]) {
+      showToast('Отчет подготовлен! Теперь нажмите кнопку подтверждения.');
+      uploadZone.classList.add('done');
+      uzTitle.textContent = 'Файл прикреплен ✅';
+    }
+  });
+
+  checkInBtn.onclick = async function() {
+    try {
+      const res = await fetch('/quest-checkin/<%= enrollment.id %>', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        showToast('Успех! +15 XP за сегодня 🎉', 'success');
+        checkInBtn.disabled = true;
+        checkInBtn.textContent = 'Выполнено сегодня 🎉';
+
+        progText.textContent = `День ${data.progress} из ${data.total}`;
+        progFill.style.width = Math.round((data.progress / data.total) * 100) + '%';
+
+        // Refresh grid
+        const cells = document.querySelectorAll('.day-cell');
+        cells.forEach((cell, idx) => {
+          const dayNum = idx + 1;
+          if (dayNum <= data.progress) {
+            cell.style.background = 'rgba(110,231,160,0.15)';
+            cell.style.color = 'var(--green)';
+            cell.style.borderColor = 'var(--green)';
+          } else if (dayNum === data.progress + 1) {
+            cell.style.background = 'var(--pink-soft)';
+            cell.style.color = 'var(--pink)';
+            cell.style.borderColor = 'var(--pink)';
+          }
+        });
+      } else {
+        const err = await res.text();
+        showToast(err, 'error');
+      }
+    } catch (err) {
+      showToast('Ошибка при отправке отчета', 'error');
+    }
+  };
+</script>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+</body>
+</html>

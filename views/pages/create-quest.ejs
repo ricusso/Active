@@ -1,0 +1,182 @@
+<%- include('../partials/head', { title: 'Создать новый квест' }) %>
+<style>
+
+main { flex: 1; padding: 40px 60px; max-width: 1000px; margin: 0 auto; width: 100%; }
+
+.stepper{display:flex;gap:12px;margin-bottom:48px;}
+.step{flex:1;height:4px;background:var(--surface3);border-radius:10px;position:relative;}
+.step.active{background:var(--pink);box-shadow:0 0 10px var(--pink);}
+.step.active::after{content:attr(data-label);position:absolute;top:12px;left:0;font-size:10px;font-weight:800;text-transform:uppercase;color:var(--pink);letter-spacing:.05em;}
+
+.wizard-step{display:none;}
+.wizard-step.active{display:block;animation:fadeIn .4s ease;}
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+h1{font-family:'Inter', sans-serif;font-size:32px;margin-bottom:12px;}
+.step-desc{color:var(--text2);margin-bottom:32px;font-size:16px;}
+
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.type-card{background:var(--surface);border:1px solid var(--border);padding:32px;border-radius:24px;cursor:pointer;transition:all .3s;position:relative;}
+.type-card:hover{border-color:var(--pink);background:rgba(14, 165, 233,0.02);}
+.type-card.active{border-color:var(--pink);background:rgba(14, 165, 233,0.05);box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+.type-ico{font-size:32px;margin-bottom:20px;display:block;}
+.type-card h3{font-family:'Inter', sans-serif;font-size:18px;margin-bottom:8px;}
+.type-card p{font-size:13px;color:var(--text2);line-height:1.5;}
+
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:16px;}
+.cat-card{background:var(--surface);border:1px solid var(--border);padding:20px;border-radius:18px;text-align:center;cursor:pointer;transition:all .2s;}
+.cat-card:hover{border-color:var(--text3);}
+.cat-card.active{border-color:var(--purple);background:rgba(176,136,208,0.08);color:var(--purple);}
+.cat-ico{font-size:24px;margin-bottom:10px;display:block;}
+.cat-card span{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;}
+
+.form-group{margin-bottom:24px;}
+label{display:block;font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;margin-bottom:10px;letter-spacing:.05em;}
+input, textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;color:var(--text);font-family:inherit;font-size:15px;outline:none;transition:border-color .2s;}
+input:focus, textarea:focus{border-color:var(--pink);}
+
+.reward-preview{background:var(--surface2);border:1px solid var(--border);padding:20px;border-radius:18px;display:flex;justify-content:space-between;align-items:center;margin-top:32px;}
+.rp-info h4{font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}
+.rp-val{font-family:'Inter', sans-serif;font-size:20px;font-weight:700;color:var(--pink);}
+
+.wizard-nav{margin-top:48px;display:flex;justify-content:space-between;gap:16px;}
+.btn-back{background:transparent;border:1px solid var(--border);color:var(--text2);padding:16px 32px;border-radius:16px;font-weight:800;cursor:pointer;}
+.btn-next{flex:1;background:linear-gradient(135deg, var(--pink), var(--purple));color:#111;padding:16px 32px;border-radius:16px;font-weight:900;border:none;font-family:inherit;font-size:16px;cursor:pointer;box-shadow:0 10px 25px rgba(14, 165, 233,0.3); transition: transform 0.2s;}
+.btn-next:hover{transform: translateY(-2px);}
+
+.blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.1; z-index: 0; pointer-events: none; }
+.blob-1 { width: 500px; height: 500px; background: var(--pink); top: -100px; right: -100px; }
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+<div class="blob blob-1"></div>
+<%- include('../partials/sidebar_mobile') %>
+<%- include('../partials/sidebar_desktop') %>
+
+<div class="page-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Создание квеста</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="stepper">
+      <div class="step active" data-label="Тип"></div>
+      <div class="step" id="s2" data-label="Категория"></div>
+      <div class="step" id="s3" data-label="Параметры"></div>
+    </div>
+
+    <div class="wizard-step active" id="step1">
+      <h1>Создать квест</h1>
+      <p class="step-desc">Выберите формат вашего будущего испытания</p>
+
+      <div class="type-grid">
+        <div class="type-card active" onclick="selectType(this)">
+          <span class="type-ico">🎯</span>
+          <h3>Для себя</h3>
+          <p>Личный трекер привычек. Развивайтесь в своем темпе без внешнего контроля.</p>
+        </div>
+        <div class="type-card" onclick="selectType(this)">
+          <span class="type-ico">👥</span>
+          <h3>Групповой</h3>
+          <p>На доверии с друзьями. Соревнуйтесь, поддерживайте друг друга и делитесь прогрессом.</p>
+        </div>
+      </div>
+
+      <div class="wizard-nav">
+        <div></div>
+        <button class="btn-next" onclick="nextStep(2)">Продолжить</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" id="step2">
+      <h1>Категория</h1>
+      <p class="step-desc">В какой сфере вы хотите стать сильнее?</p>
+
+      <div class="cat-grid">
+        <div class="cat-card active" onclick="selectCat(this)"><span class="cat-ico">🏃‍♂️</span><span>Спорт</span></div>
+        <div class="cat-card" onclick="selectCat(this)"><span class="cat-ico">🧠</span><span>Разум</span></div>
+        <div class="cat-card" onclick="selectCat(this)"><span class="cat-ico">💻</span><span>Код</span></div>
+        <div class="cat-card" onclick="selectCat(this)"><span class="cat-ico">🍎</span><span>Здоровье</span></div>
+        <div class="cat-card" onclick="selectCat(this)"><span class="cat-ico">🎨</span><span>Творчество</span></div>
+        <div class="cat-card" onclick="selectCat(this)"><span class="cat-ico">📚</span><span>Книги</span></div>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="btn-back" onclick="nextStep(1)">Назад</button>
+        <button class="btn-next" onclick="nextStep(3)">Продолжить</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" id="step3">
+      <h1>Настройка квеста</h1>
+      <p class="step-desc">Определите условия и длительность вашего пути</p>
+
+      <div class="form-group">
+        <label>Название квеста</label>
+        <input type="text" id="qName" placeholder="Например: 100 дней без сахара" oninput="updateReward()">
+      </div>
+
+      <div class="form-group">
+        <label>Длительность (дней)</label>
+        <input type="number" id="qDays" value="30" min="1" max="365" oninput="updateReward()">
+      </div>
+
+      <div class="form-group">
+        <label>Ваша цель</label>
+        <textarea rows="3" placeholder="Что именно вы будете считать выполненным заданием?"></textarea>
+      </div>
+
+      <div class="reward-preview">
+        <div class="rp-info">
+          <h4>Награда за финиш</h4>
+          <div class="rp-val" id="xpPreview">+450 XP</div>
+        </div>
+        <div style="font-size: 24px;">🏆</div>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="btn-back" onclick="nextStep(2)">Назад</button>
+        <button class="btn-next" onclick="location.href='/my-quests'">Запустить квест 🚀</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+
+  function selectType(el) {
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function selectCat(el) {
+    document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function nextStep(n) {
+    document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+
+    document.querySelectorAll('.step').forEach((s, idx) => {
+      if(idx < n) s.classList.add('active');
+      else s.classList.remove('active');
+    });
+  }
+
+  function updateReward() {
+    const days = document.getElementById('qDays').value || 0;
+    const xp = days * 15;
+    document.getElementById('xpPreview').textContent = '+' + xp.toLocaleString() + ' XP';
+  }
+</script>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+</body>
+</html>

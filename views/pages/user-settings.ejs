@@ -1,0 +1,154 @@
+<%- include('../partials/head', { title: 'Личный кабинет' }) %>
+<style>
+
+main { padding: 32px 32px 56px; flex: 1; }
+
+h1{font-family:'Inter', sans-serif;font-size:32px;margin-bottom:32px; background:linear-gradient(120deg,var(--text) 60%,var(--pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
+
+.settings-tabs{display:flex;gap:32px;border-bottom:1px solid var(--border);margin-bottom:40px;}
+.s-tab{padding:12px 0;font-size:14px;font-weight:800;color:var(--text3);cursor:pointer;position:relative;transition:color .2s;}
+.s-tab:hover{color:var(--text2);}
+.s-tab.active{color:var(--pink);}
+.s-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--pink);box-shadow:0 0 10px var(--pink);}
+
+.settings-section{display:none;max-width:800px;animation:fadeIn .3s ease;}
+.settings-section.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.settings-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:32px;margin-bottom:24px; position:relative; overflow:hidden;}
+.settings-card::after{content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.02) 0%,transparent 50%); pointer-events:none;}
+.settings-card h2{font-family:'Inter', sans-serif;font-size:18px;margin-bottom:24px;}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.input-group{margin-bottom:20px;}
+label{display:block;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;margin-bottom:8px;letter-spacing:.05em;}
+input, textarea, select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px;color:var(--text);font-family:inherit;outline:none;transition:border-color .2s;}
+input:focus{border-color:var(--pink);}
+
+.wallet-box{background:linear-gradient(135deg, var(--purple), var(--pink));padding:32px;border-radius:20px;color:#111;margin-bottom:32px;display:flex;justify-content:space-between;align-items:center;}
+.w-balance h3{font-size:12px;font-weight:800;text-transform:uppercase;opacity:.7;}
+.w-balance .amount{font-family:'Inter', sans-serif;font-size:32px;font-weight:900;}
+.btn-topup{background:#111;color:#fff;border:none;padding:12px 24px;border-radius:12px;font-weight:800;cursor:pointer;}
+
+.sub-card{display:flex;justify-content:space-between;align-items:center;background:var(--surface2);padding:20px;border-radius:16px;border:1px solid var(--border);}
+.sub-info h4{font-weight:800;font-size:16px;margin-bottom:4px;}
+.sub-info p{font-size:12px;color:var(--text3);}
+.badge-active{background:rgba(110,231,160,0.1);color:var(--green);padding:4px 10px;border-radius:50px;font-size:10px;font-weight:900;}
+
+.btn-primary{background:var(--pink);color:#111;border:none;padding:14px 28px;border-radius:14px;font-weight:900;cursor:pointer;font-family:inherit;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2);padding:14px 28px;border-radius:14px;font-weight:900;cursor:pointer;font-family:inherit;}
+
+@media (max-width: 768px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+
+<%- include('../partials/sidebar_desktop') %>
+
+<div class="page-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Мой профиль</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <h1>Личный кабинет</h1>
+
+    <div class="settings-tabs">
+      <div class="s-tab active" data-target="profile">Профиль</div>
+      <div class="s-tab" data-target="billing">Баланс и Подписки</div>
+      <div class="s-tab" data-target="security">Безопасность</div>
+    </div>
+
+    <div class="settings-section active" id="profile">
+      <div class="settings-card">
+        <h2>Основная информация</h2>
+        <div class="form-grid">
+          <div class="input-group">
+            <label>Имя пользователя</label>
+            <input type="text" value="<%= user.name %>">
+          </div>
+          <div class="input-group">
+            <label>Email</label>
+            <input type="email" value="<%= user.email %>">
+          </div>
+        </div>
+        <div class="input-group">
+          <label>О себе (Био)</label>
+          <textarea rows="4">Прокачиваю навыки осознанности и спортивной дисциплины. Люблю RPG и хардкорные челленджи.</textarea>
+        </div>
+        <button class="btn-primary" onclick="showToast('Профиль обновлен')">Сохранить изменения</button>
+      </div>
+    </div>
+
+    <div class="settings-section" id="billing">
+      <div class="wallet-box">
+        <div class="w-balance">
+          <h3>Текущий баланс</h3>
+          <div class="amount"><%= user.balance.toLocaleString() %> ₽</div>
+        </div>
+        <button class="btn-topup" onclick="showToast('Переход к оплате...')">Пополнить</button>
+      </div>
+
+      <div class="settings-card">
+        <h2>Ваша подписка</h2>
+        <div class="sub-card">
+          <div class="sub-info">
+            <h4>Актив Premium <span class="badge-active">Активна</span></h4>
+            <p>Следующее списание: 12 марта 2025</p>
+          </div>
+          <button class="btn-outline" onclick="showToast('Подписка отменена', 'error')">Отменить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section" id="security">
+      <div class="settings-card">
+        <h2>Смена пароля</h2>
+        <div class="input-group">
+          <label>Текущий пароль</label>
+          <input type="password" placeholder="••••••••">
+        </div>
+        <div class="form-grid">
+          <div class="input-group">
+            <label>Новый пароль</label>
+            <input type="password" placeholder="Минимум 8 символов">
+          </div>
+          <div class="input-group">
+            <label>Повторите пароль</label>
+            <input type="password" placeholder="••••••••">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="showToast('Пароль успешно изменен')">Обновить пароль</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+
+  const tabs = document.querySelectorAll('.s-tab');
+  const sections = document.querySelectorAll('.settings-section');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('active'));
+
+      tab.classList.add('active');
+      const target = tab.getAttribute('data-target');
+      document.getElementById(target).classList.add('active');
+    });
+  });
+</script>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+</body>
+</html>

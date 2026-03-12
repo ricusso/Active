@@ -1,0 +1,312 @@
+<%- include('../partials/head', { title: expert.name }) %>
+<style>
+:root {
+  --bg: #0e0e12;
+  --surface: #16161c;
+  --surface2: #1e1e26;
+  --surface3: #26262f;
+  --surface4: #2e2e3a;
+  --pink: #0ea5e9;
+  --pink2: #d488c4;
+  --pink-glow: rgba(14, 165, 233,0.18);
+  --pink-soft: rgba(14, 165, 233,0.07);
+  --purple: #2563eb;
+  --text: #f0f0f6;
+  --text2: #8888a0;
+  --text3: #505062;
+  --border: rgba(255,255,255,0.055);
+  --border2: rgba(255,255,255,0.10);
+  --green: #6ee7a0;
+  --red: #f87171;
+  --orange: #ff9b4e;
+  --blue: #7ec8e8;
+  --gold: #fbbf24;
+  --r: 16px;
+  --r-sm: 10px;
+  --sidebar: 240px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:0.02;pointer-events:none;z-index:9999;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+
+.breadcrumb a { color: var(--text3); text-decoration: none; transition: color 0.2s; }
+.breadcrumb a:hover { color: var(--text2); }
+.breadcrumb span{color:var(--text);font-weight:800;}
+
+main { padding: 32px 32px 56px; flex: 1; }
+
+.profile-hdr{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:32px;margin-bottom:24px;position:relative;overflow:hidden;
+  display:flex;gap:32px;align-items:center;
+}
+.profile-hdr::before{
+  content:'';position:absolute;top:-100px;right:-50px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(14, 165, 233,0.1),transparent 70%);pointer-events:none;
+}
+.p-avatar-wrap{position:relative;flex-shrink:0;}
+.p-avatar{
+  width:140px;height:140px;border-radius:32px;background:var(--surface3);
+  border:3px solid var(--border);overflow:hidden;
+}
+.p-avatar img{width:100%;height:100%;object-fit:cover;}
+
+.p-info-wrap { flex: 1; min-width: 0; }
+.p-name-area { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.p-info h1{font-family:'Inter', sans-serif;font-size:28px;font-weight:900;letter-spacing:-0.03em;}
+.p-verified{
+  width:28px;height:28px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 15px rgba(14, 165, 233,.5);
+  color:#111;flex-shrink: 0;
+}
+
+.p-sphere{color:var(--pink);font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;}
+.p-stats-row{display:flex;gap:32px;}
+.p-stat{display:flex;flex-direction:column;gap:2px;}
+.p-stat-val{font-family:'Inter', sans-serif;font-size:18px;font-weight:700;color:var(--text);}
+.p-stat-lbl{font-size:11px;color:var(--text3);font-weight:800;text-transform:uppercase;letter-spacing:.05em;}
+.p-rating-star{color:var(--gold);margin-right:4px;}
+
+.profile-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:24px;}
+.card-title{font-family:'Inter', sans-serif;font-size:16px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.card-title svg{color:var(--pink);}
+
+.bio-text{color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:20px;}
+
+.info-list{display:flex;flex-direction:column;gap:16px;}
+.info-item{display:flex;gap:14px;}
+.info-ico{
+  width:36px;height:36px;border-radius:10px;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--pink);
+}
+.info-content .h{font-size:13px;font-weight:800;margin-bottom:2px;}
+.info-content .p{font-size:12px;color:var(--text3);font-weight:600;}
+
+.review-item{padding:18px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:12px;}
+.rev-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.rev-user{display:flex;align-items:center;gap:10px;}
+.rev-avatar{width:28px;height:28px;border-radius:50%;background:var(--surface3);}
+.rev-name{font-size:12px;font-weight:800;}
+.rev-stars{font-size:11px;color:var(--gold);}
+.rev-text{font-size:13px;color:var(--text2);line-height:1.5;}
+.rev-date{font-size:11px;color:var(--text3);margin-top:8px;}
+
+.sticky-card{position:sticky;top:82px;}
+.price-card{
+  background:linear-gradient(145deg, var(--surface2), var(--surface));
+  border:1px solid var(--border);border-radius:var(--r);padding:24px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+}
+.pc-price{margin-bottom:24px;}
+.pc-price-val{font-family:'Inter', sans-serif;font-size:24px;font-weight:900;color:var(--text);}
+.pc-price-lbl{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-top:4px;}
+
+.pc-title{font-size:12px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;}
+.quest-mini{
+  background:var(--surface3);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:12px;margin-bottom:10px;cursor:pointer;transition:all .2s;
+}
+.quest-mini:hover{border-color:var(--pink);transform:translateX(4px);}
+.qm-name{font-size:13px;font-weight:800;margin-bottom:4px;}
+.qm-meta{display:flex;gap:10px;font-size:10px;color:var(--text3);font-weight:700;}
+.qm-meta span{display:flex;align-items:center;gap:4px;}
+
+.btn-cta{
+  width:100%;background:linear-gradient(135deg,var(--pink),var(--purple));
+  border:none;border-radius:var(--r-sm);padding:14px;
+  color:#111;font-size:14px;font-weight:900;font-family:inherit;
+  cursor:pointer;margin-top:20px;transition:all .2s;
+}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(14, 165, 233,.4);}
+
+.blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.1; z-index: 0; pointer-events: none; }
+.blob-1 { width: 500px; height: 500px; background: var(--purple); top: -100px; right: -100px; }
+
+@media (max-width: 768px) {
+
+  main { padding: 32px 32px 56px; flex: 1; }
+  .profile-hdr { flex-direction: column; text-align: center; }
+  .p-stats-row { justify-content: center; }
+  .profile-grid { grid-template-columns: 1fr; }
+}
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+<div class="blob blob-1"></div>
+<%- include('../partials/sidebar_mobile') %>
+<%- include('../partials/sidebar_desktop') %><div class="page-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Профиль эксперта</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <div class="profile-hdr">
+      <div class="p-avatar-wrap">
+        <div class="p-avatar">
+          <img src="https://i.pravatar.cc/300?u=<%= expert.id %>" alt="<%= expert.name %>">
+        </div>
+      </div>
+      <div class="p-info-wrap">
+        <div class="p-sphere"><%= expert.sphere %></div>
+        <div class="p-name-area">
+          <div class="p-info"><h1><%= expert.name %></h1></div>
+          <div class="p-verified">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="p-stats-row">
+          <div class="p-stat">
+            <div class="p-stat-val"><span class="p-rating-star">★</span><%= expert.rating %></div>
+            <div class="p-stat-lbl">Рейтинг</div>
+          </div>
+          <div class="p-stat">
+            <div class="p-stat-val"><%= expert.students %></div>
+            <div class="p-stat-lbl">Учеников</div>
+          </div>
+          <div class="p-stat">
+            <div class="p-stat-val"><%= expert.quests %></div>
+            <div class="p-stat-lbl">Квестов</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+
+      <div class="profile-main">
+        <div class="card">
+          <div class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            О себе
+          </div>
+          <p class="bio-text"><%= expert.bio %></p>
+          <p class="bio-text">
+            Методология обучения построена на практическом применении знаний и ежедневном трекинге прогресса. Каждый ученик получает индивидуальную обратную связь по видео-отчетам.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            Опыт и образование
+          </div>
+          <div class="info-list">
+            <div class="info-item">
+              <div class="info-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+              <div class="info-content">
+                <div class="h">Senior Expert, Актив Performance Labs</div>
+                <div class="p">2020 — Настоящее время · Менторство</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="reviews-section">
+          <div class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Отзывы клиентов
+          </div>
+          <div class="review-item">
+            <div class="rev-hdr">
+              <div class="rev-user">
+                <div class="rev-avatar"></div>
+                <div class="rev-name">Дмитрий Волков</div>
+              </div>
+              <div class="rev-stars">★★★★★</div>
+            </div>
+            <p class="rev-text">Этот эксперт помог мне полностью перестроить мой режим. Результаты превзошли ожидания!</p>
+            <div class="rev-date">15 мая 2025</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-side">
+        <div class="sticky-card">
+          <div class="price-card">
+            <div class="pc-price">
+              <div class="pc-price-lbl">Консультация от</div>
+              <div class="pc-price-val"><%= expert.price %></div>
+            </div>
+
+            <div class="pc-title">Активные челленджи</div>
+
+            <div class="quest-mini">
+              <div class="qm-name">Базовый протокол</div>
+              <div class="qm-meta">
+                <span>⏱ 7 дн</span>
+                <span>🔥 124 участника</span>
+              </div>
+            </div>
+
+            <div class="quest-mini">
+              <div class="qm-name">Продвинутый уровень</div>
+              <div class="qm-meta">
+                <span>⏱ 14 дн</span>
+                <span>💎 Expert</span>
+              </div>
+            </div>
+
+            <button class="btn-cta" id="btnBook">Записаться на сессию</button>
+            <div style="text-align: center; margin-top: 14px;">
+              <a href="/chat/<%= expert.id %>" style="color:var(--text3); font-size:11px; text-decoration:none; font-weight:700;">Написать в чат</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="successModal">
+  <div class="card" style="max-width: 400px; text-align: center; padding: 48px 32px;">
+    <div style="width: 64px; height: 64px; background: rgba(110,231,160,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: var(--green);">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2 style="font-family:'Inter', sans-serif; font-size: 20px; margin-bottom: 12px;">Заявка принята!</h2>
+    <p style="color: var(--text2); font-size: 14px; margin-bottom: 32px;">Вы успешно записались на сессию к эксперту. Теперь вы можете обсудить детали в личном чате.</p>
+    <button class="btn-cta" onclick="location.href='/chat/<%= expert.id %>'">Перейти в чат</button>
+  </div>
+</div>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+<script>
+
+  const btnBook = document.getElementById('btnBook');
+  const modal = document.getElementById('successModal');
+
+  if(btnBook) {
+    btnBook.onclick = () => {
+
+      showToast('Обработка заявки...');
+      setTimeout(() => {
+        modal.style.display = 'flex';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.background = 'rgba(0,0,0,0.85)';
+        modal.style.backdropFilter = 'blur(10px)';
+        modal.style.zIndex = '1000';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+      }, 800);
+    };
+  }
+</script>
+</body>
+</html>

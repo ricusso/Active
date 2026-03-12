@@ -1,0 +1,120 @@
+<%- include('../partials/head', { title: 'Управление Квестами PRO' }) %>
+<style>
+:root {
+  --bg: #0e0e12;
+  --surface: #16161c;
+  --surface2: #1e1e26;
+  --surface3: #26262f;
+  --pink: #0ea5e9;
+  --purple: #2563eb;
+  --text: #f0f0f6;
+  --text2: #8888a0;
+  --text3: #505062;
+  --border: rgba(255,255,255,0.055);
+  --green: #6ee7a0;
+  --r: 14px;
+  --sidebar: 240px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+
+.blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.1; z-index: 0; pointer-events: none; }
+.blob-1 { width: 500px; height: 500px; background: var(--purple); top: -100px; right: -100px; }
+
+main { padding: 32px 32px 56px; flex: 1; }
+
+.q-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+.q-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 24px; position: relative;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  overflow: hidden;
+}
+.q-card:hover { border-color: var(--purple); transform: translateY(-5px); box-shadow: 0 15px 45px rgba(0,0,0,0.4); }
+
+.q-badge { position: absolute; top: 20px; right: 20px; padding: 4px 12px; border-radius: 50px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+.q-badge.active { background: rgba(110,231,160,0.1); color: var(--green); border: 1px solid rgba(110,231,160,0.2); }
+.q-badge.draft { background: rgba(176,136,208,0.1); color: var(--purple); border: 1px solid rgba(176,136,208,0.2); }
+
+.q-name { font-family: 'Inter', sans-serif; font-size: 18px; margin: 15px 0 20px; }
+.q-stats-row { display: flex; gap: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+.qs-item .val { display: block; font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); }
+.qs-item .lbl { font-size: 11px; color: var(--text3); font-weight: 800; text-transform: uppercase; margin-top: 4px; }
+
+.q-actions { display: flex; gap: 10px; }
+.btn-q { flex: 1; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 800; text-align: center; text-decoration: none; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-q-edit { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+.btn-q-edit:hover { border-color: var(--purple); color: var(--purple); }
+.btn-q-stats { background: rgba(176,136,208,0.1); color: var(--purple); border: 1px solid rgba(176,136,208,0.2); }
+.btn-q-stats:hover { background: var(--purple); color: #111; }
+
+.page-header-pro { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+.btn-add-new { background: var(--purple); color: #111; padding: 14px 28px; border-radius: 14px; font-weight: 900; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: all 0.3s; box-shadow: 0 10px 25px rgba(176,136,208,0.3); }
+.btn-add-new:hover { transform: scale(1.03); box-shadow: 0 15px 35px rgba(176,136,208,0.45); }
+
+@media (max-width: 768px) {
+  .page-header-pro { flex-direction: column; align-items: flex-start; gap: 20px; }
+}
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+<div class="blob blob-1"></div>
+<%- include('../partials/sidebar_mobile') %>
+<%- include('../partials/sidebar_desktop') %>
+
+<div class="page-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Квесты PRO</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="page-header-pro">
+      <div>
+        <h1 style="font-family:'Inter', sans-serif; font-size: 32px;">Мои квесты</h1>
+        <p style="color: var(--text2);">Создавайте и оптимизируйте свои программы</p>
+      </div>
+      <a href="/expert/create-quest" class="btn-add-new">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Новый квест
+      </a>
+    </div>
+
+    <div class="q-grid">
+      <div class="q-card">
+        <span class="q-badge active">Активен</span>
+        <div style="font-size: 24px; margin-top: 10px;">🧪</div>
+        <h3 class="q-name">Дофаминовый детокс</h3>
+        <div class="q-stats-row">
+          <div class="qs-item"><span class="val">124</span><span class="lbl">Участников</span></div>
+          <div class="qs-item"><span class="val">4.9 ★</span><span class="lbl">Рейтинг</span></div>
+        </div>
+        <div class="q-actions">
+          <a href="/expert/edit-quest" class="btn-q btn-q-edit">Редактировать</a>
+          <a href="/expert/quest-analytics" class="btn-q btn-q-stats">Аналитика</a>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <span class="q-badge draft">Черновик</span>
+        <div style="font-size: 24px; margin-top: 10px;">💤</div>
+        <h3 class="q-name">Биохакинг сна</h3>
+        <div class="q-stats-row">
+          <div class="qs-item"><span class="val">0</span><span class="lbl">Участников</span></div>
+          <div class="qs-item"><span class="val">—</span><span class="lbl">Рейтинг</span></div>
+        </div>
+        <div class="q-actions">
+          <a href="/expert/edit-quest" class="btn-q btn-q-edit" style="flex: 2;">Продолжить настройку</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+</body>
+</html>

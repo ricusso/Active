@@ -1,0 +1,96 @@
+<%- include('../partials/head', { title: '30 дней бега' }) %>
+<style>
+:root {
+  --bg: #0e0e12;
+  --surface: #16161c;
+  --surface2: #1e1e26;
+  --pink: #0ea5e9;
+  --purple: #2563eb;
+  --text: #f0f0f6;
+  --text2: #8888a0;
+  --text3: #505062;
+  --border: rgba(255,255,255,0.06);
+  --r: 20px;
+  --sidebar: 240px;
+  --green: #6ee7a0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+
+main { padding: 32px 32px 56px; flex: 1; }
+
+.hdr{margin-bottom:32px;}
+.hdr h1{font-family:'Inter', sans-serif;font-size:28px;margin-bottom:8px;}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:20px;margin-bottom:32px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);padding:20px;border-radius:var(--r);text-align:center;}
+.stat-val{font-family:'Inter', sans-serif;font-size:20px;font-weight:700;color:var(--pink);}
+.stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;font-weight:800;margin-top:4px;}
+
+.tracker-grid{display:grid;grid-template-columns:repeat(7, 1fr);gap:12px;}
+.day-box{aspect-ratio:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--text3);cursor:pointer;transition:all .2s;}
+.day-box.done{background:rgba(14, 165, 233,0.1);border-color:var(--pink);color:var(--pink);}
+.day-box.current{border:2px solid var(--purple);color:var(--text);}
+.day-box:hover:not(.done){border-color:var(--pink);}
+
+.btn-check{width:100%;background:linear-gradient(135deg, var(--pink), var(--purple));color:#111;padding:18px;border-radius:16px;font-weight:900;border:none;font-family:inherit;font-size:16px;margin-top:32px;cursor:pointer;box-shadow:0 10px 25px rgba(14, 165, 233,0.3); transition: transform 0.2s;}
+.btn-check:hover{transform: translateY(-2px);}
+
+.blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.1; z-index: 0; pointer-events: none; }
+.blob-1 { width: 500px; height: 500px; background: var(--purple); top: -100px; right: -100px; }
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+<div class="blob blob-1"></div>
+<%- include('../partials/sidebar_mobile') %>
+<%- include('../partials/sidebar_desktop') %><div class="page-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Детали квеста</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="hdr">
+      <h1>30 дней бега</h1>
+      <p style="color:var(--text2)">День 15: Середина пути. Не сбавляй темп!</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val">14/30</div><div class="stat-lbl">Выполнено дней</div></div>
+      <div class="stat-card"><div class="stat-val">45%</div><div class="stat-lbl">Прогресс</div></div>
+      <div class="stat-card"><div class="stat-val">+450</div><div class="stat-lbl">XP за финиш</div></div>
+    </div>
+
+    <div class="tracker-grid">
+      <div class="day-box done">1</div><div class="day-box done">2</div><div class="day-box done">3</div><div class="day-box done">4</div><div class="day-box done">5</div><div class="day-box done">6</div><div class="day-box done">7</div>
+      <div class="day-box done">8</div><div class="day-box done">9</div><div class="day-box done">10</div><div class="day-box done">11</div><div class="day-box done">12</div><div class="day-box done">13</div><div class="day-box done">14</div>
+      <div class="day-box current">15</div><div class="day-box">16</div><div class="day-box">17</div><div class="day-box">18</div><div class="day-box">19</div><div class="day-box">20</div><div class="day-box">21</div>
+      <div class="day-box">22</div><div class="day-box">23</div><div class="day-box">24</div><div class="day-box">25</div><div class="day-box">26</div><div class="day-box">27</div><div class="day-box">28</div>
+      <div class="day-box">29</div><div class="day-box">30</div>
+    </div>
+
+    <button class="btn-check" id="checkIn">Отметиться сегодня</button>
+  </main>
+</div>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+<script>
+
+  document.getElementById('checkIn').onclick = function() {
+    const current = document.querySelector('.day-box.current');
+    if(current) {
+      current.classList.remove('current');
+      current.classList.add('done');
+    }
+    this.textContent = 'Выполнено! 🎉';
+    this.style.background = 'var(--green)';
+    this.disabled = true;
+    showToast('Успех! +15 XP за сегодня');
+  }
+</script>
+</body>
+</html>

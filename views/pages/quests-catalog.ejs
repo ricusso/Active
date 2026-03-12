@@ -1,0 +1,299 @@
+<%- include('../partials/head', { title: 'Каталог квестов' }) %>
+<style>
+
+body::before{
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:0.025; pointer-events:none; z-index:9999;
+}
+
+.blob{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(90px);opacity:0.13;}
+.blob-1{width:500px;height:500px;background:radial-gradient(circle,var(--purple),transparent 70%);top:-100px;right:-100px;}
+
+main { padding: 32px 32px 56px; flex: 1; }
+
+.page-hdr{margin-bottom:32px;}
+.page-hdr h1{
+  font-family:'Inter', sans-serif;font-size:24px;font-weight:900;
+  background:linear-gradient(120deg,var(--text) 60%,var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;
+}
+.page-hdr p{color:var(--text2);font-size:14px;font-weight:600;}
+
+.quest-tabs{
+  display:flex;gap:12px;margin-bottom:24px;
+  padding:6px;background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;width:fit-content;
+}
+.q-tab{
+  padding:10px 20px;border-radius:10px;border:none;
+  background:transparent;color:var(--text3);font-family:inherit;
+  font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:8px;
+}
+.q-tab svg{opacity:.6;}
+.q-tab.active{
+  background:var(--surface2);color:var(--pink);
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.q-tab.active svg{opacity:1;color:var(--pink);}
+
+.filter-row{ display:flex;gap:16px;margin-bottom:32px;align-items:center; }
+.search-box{ flex:1;position:relative; }
+.search-box input{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px 12px 42px;
+  color:var(--text);font-family:inherit;outline:none;
+}
+.search-box svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);}
+
+.quest-grid{
+  display:grid;grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));gap:20px;
+}
+
+.quest-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:24px;position:relative;overflow:hidden;
+  transition:all .3s cubic-bezier(.22,1,.36,1);
+  display:flex;flex-direction:column;
+}
+.quest-card:hover{
+  border-color:rgba(14, 165, 233,.2);transform:translateY(-5px);
+  box-shadow:0 15px 40px rgba(0,0,0,.4);
+}
+.quest-card.hidden { display: none; opacity: 0; }
+
+.q-badge-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.q-difficulty{
+  font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;
+  padding:4px 10px;border-radius:50px;
+}
+.q-difficulty.easy{background:rgba(110,231,160,.1);color:var(--green);}
+.q-difficulty.mid{background:rgba(251,191,36,.1);color:var(--gold);}
+.q-difficulty.hard{background:rgba(248,113,113,.1);color:var(--red);}
+
+.q-xp{ font-family:'Inter', sans-serif;font-size:12px;font-weight:700;color:var(--pink); }
+
+.q-title{font-family:'Inter', sans-serif;font-size:18px;font-weight:700;margin-bottom:8px;line-height:1.3;}
+.q-desc{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+.q-creator{
+  display:flex;align-items:center;gap:10px;margin-bottom:20px;
+  padding:10px;background:var(--surface2);border-radius:10px;
+}
+.qc-avatar{width:32px;height:32px;border-radius:8px;background:var(--surface3);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#111;font-weight:900;font-size:10px;}
+.qc-avatar img{width:100%;height:100%;object-fit:cover;}
+.qc-info{flex:1;}
+.qc-name{font-size:12px;font-weight:800;}
+.qc-type{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;}
+
+.q-stats{
+  display:flex;gap:20px;padding-top:18px;border-top:1px solid var(--border);margin-top:auto;
+}
+.qs-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);font-weight:700;}
+.qs-item svg{color:var(--pink);}
+
+.btn-join{
+  width:100%;background:var(--surface3);border:1px solid var(--border);
+  border-radius:10px;padding:12px;color:var(--text);
+  font-size:13px;font-weight:800;font-family:inherit;
+  cursor:pointer;margin-top:20px;transition:all .2s;
+  text-align:center;text-decoration:none;
+}
+.btn-join:hover{
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:#111;border-color:transparent;
+  box-shadow:0 8px 20px rgba(14, 165, 233,.3);
+}
+.btn-join.active { background: var(--green); color: #111; border-color: transparent; }
+
+@keyframes fadeInUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+.a-1{animation:fadeInUp .5s ease .1s both;}
+.a-2{animation:fadeInUp .5s ease .2s both;}
+
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);
+  z-index:999;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modal-overlay.active{opacity:1;pointer-events:all;}
+.modal-content{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  width:100%;max-width:420px;padding:32px;position:relative;
+  transform:translateY(20px);transition:transform .3s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.m-title { font-family: 'Inter', sans-serif; font-size: 20px; margin-bottom: 8px; }
+.m-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+.m-features { margin-bottom: 24px; }
+.m-feat { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+.m-feat svg { color: var(--green); }
+.m-price { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: var(--surface2); border-radius: 12px; margin-bottom: 24px; }
+.mp-lbl { font-size: 11px; font-weight: 800; color: var(--text3); text-transform: uppercase; }
+.mp-val { font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); }
+.btn-pay { width: 100%; background: var(--pink); color: #111; border: none; padding: 16px; border-radius: 12px; font-weight: 900; cursor: pointer; font-family: inherit; }
+.modal-close { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: var(--text3); cursor: pointer; }
+</style>
+<body class="<%= user ? 'logged-in' : 'guest' %>">
+
+<div class="blob blob-1"></div>
+
+<%- include('../partials/sidebar_desktop') %><div class="page-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">
+        <a href="/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Платформа</a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Каталог квестов</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="page-hdr a-1">
+      <h1>Выберите свое испытание</h1>
+      <p>Прокачивайте навыки и привычки в игровом формате</p>
+    </div>
+
+    <div class="quest-tabs a-1">
+      <button class="q-tab active" data-target="expert">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        От экспертов
+      </button>
+      <button class="q-tab" data-target="user">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        От сообщества
+      </button>
+    </div>
+
+    <div class="filter-row a-1">
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="questSearch" placeholder="Поиск квестов по названию...">
+      </div>
+    </div>
+
+    <div class="quest-grid" id="questGrid">
+      <% quests.forEach(quest => { %>
+        <div class="quest-card a-2 <%= quest.creator_type === 'user' ? 'hidden' : '' %>" data-type="<%= quest.creator_type %>">
+          <div class="q-badge-row">
+            <span class="q-difficulty <%= quest.difficulty %>">
+              <%= quest.difficulty === 'hard' ? 'Сложно' : quest.difficulty === 'mid' ? 'Средне' : 'Легко' %>
+            </span>
+            <span class="q-xp">+<%= quest.reward_xp.toLocaleString() %> XP</span>
+          </div>
+          <h3 class="q-title"><%= quest.title %></h3>
+          <p class="q-desc"><%= quest.description %></p>
+
+          <div class="q-creator">
+            <div class="qc-avatar"><%= quest.creator_type === 'expert' ? 'EP' : 'U' %></div>
+            <div class="qc-info">
+              <div class="qc-name"><%= quest.creator_type === 'expert' ? 'Эксперт Актив' : 'Участник' %></div>
+              <div class="qc-type"><%= quest.category %></div>
+            </div>
+          </div>
+
+          <div class="q-stats">
+            <div class="qs-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <%= quest.duration_days %> дней</div>
+            <div class="qs-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> 1.2k участников</div>
+          </div>
+
+          <% if(quest.price > 0) { %>
+            <button class="btn-join" data-id="<%= quest.id %>" data-title="<%= quest.title %>" data-price="<%= quest.price %>">Участвовать</button>
+          <% } else { %>
+            <button class="btn-join free" data-id="<%= quest.id %>">Начать бесплатно</button>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="payModal">
+  <div class="modal-content">
+    <button class="modal-close" id="closeModal">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="m-title" id="mTitle">Доступ к квесту</div>
+    <div class="m-sub">Этот квест проходит под личным кураторством эксперта. Оплатите доступ, чтобы начать.</div>
+
+    <div class="m-features">
+      <div class="m-feat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Закрытый чат с наставником</div>
+      <div class="m-feat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Персональная проверка видео-отчетов</div>
+    </div>
+
+    <div class="m-price">
+      <div><div class="mp-lbl">Разовая оплата</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">Доступ навсегда</div></div>
+      <div class="mp-val" id="mPrice">2 500 ₽</div>
+    </div>
+
+    <button class="btn-pay" id="confirmPay">Оплатить и начать</button>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  const $cards = $('.quest-card');
+  const $tabs = $('.q-tab');
+  const $search = $('#questSearch');
+
+  function filterQuests() {
+    const activeType = $('.q-tab.active').data('target');
+    const query = $search.val().toLowerCase();
+
+    $cards.each(function() {
+      const $card = $(this);
+      const typeMatch = $card.data('type') === activeType;
+      const title = $card.find('.q-title').text().toLowerCase();
+      const searchMatch = title.includes(query);
+
+      if (typeMatch && searchMatch) {
+        $card.removeClass('hidden').css('opacity', '0');
+        setTimeout(() => $card.css('opacity', '1'), 10);
+      } else {
+        $card.css('opacity', '0');
+        setTimeout(() => $card.addClass('hidden'), 300);
+      }
+    });
+  }
+
+  $tabs.on('click', function() {
+    $tabs.removeClass('active');
+    $(this).addClass('active');
+    filterQuests();
+  });
+
+  $search.on('input', filterQuests);
+
+  const $modal = $('#payModal');
+  const $mTitle = $('#mTitle');
+  const $mPrice = $('#mPrice');
+  let selectedQuestId = null;
+
+  $('.btn-join').on('click', function() {
+    const qid = $(this).data('id');
+    const title = $(this).data('title');
+    const price = $(this).data('price');
+
+    if (price > 0) {
+      selectedQuestId = qid;
+      $mTitle.text(title);
+      $mPrice.text(price + ' ₽');
+      $modal.addClass('active');
+    } else {
+      location.href = '/checkout/' + qid;
+    }
+  });
+
+  $('#confirmPay').on('click', function() {
+    if (selectedQuestId) location.href = '/checkout/' + selectedQuestId;
+  });
+
+  $('#closeModal').on('click', () => $modal.removeClass('active'));
+});
+</script>
+
+<%- include('../partials/toast') %>
+<script src="/js/scripts.js"></script>
+</body>
+</html>
