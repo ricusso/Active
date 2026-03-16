@@ -1,15 +1,14 @@
-﻿<div id="toast-container"></div>
+<div id="toast-container"></div>
 <script>
-
-  window.showToast = function(message, type = 'success') {
-    const container = document.getElementById('toast-container');
+  window.showToast = function (message, type = "success") {
+    const container = document.getElementById("toast-container");
     if (!container) return;
-    const toast = document.createElement('div');
+    const toast = document.createElement("div");
     toast.className = `toast ${type} show`;
     toast.innerText = message;
     container.appendChild(toast);
     setTimeout(() => {
-      toast.classList.remove('show');
+      toast.classList.remove("show");
       setTimeout(() => toast.remove(), 400);
     }, 3000);
   };

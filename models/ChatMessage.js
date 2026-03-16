@@ -5,24 +5,24 @@ const ChatMessage = sequelize.define('ChatMessage', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
+    primaryKey: true,
   },
   enrollmentId: {
     type: DataTypes.UUID,
-    allowNull: false
+    allowNull: false,
   },
   senderId: {
     type: DataTypes.UUID,
-    allowNull: false
+    allowNull: false,
   },
   senderRole: {
     type: DataTypes.ENUM('user', 'expert'),
-    allowNull: false
+    allowNull: false,
   },
   message: {
     type: DataTypes.TEXT,
-    allowNull: false
-  }
+    allowNull: false,
+  },
 });
 
 module.exports = ChatMessage;

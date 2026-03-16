@@ -1,4 +1,4 @@
-﻿const { DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const User = sequelize.define('User', {
@@ -14,7 +14,7 @@ const User = sequelize.define('User', {
   bio: { type: DataTypes.TEXT },
   expert_sphere: { type: DataTypes.STRING },
   expert_rating: { type: DataTypes.FLOAT, defaultValue: 0.0 },
-  verified: { type: DataTypes.BOOLEAN, defaultValue: false }
+  verified: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
 
 module.exports = User;

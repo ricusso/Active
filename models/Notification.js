@@ -5,27 +5,27 @@ const Notification = sequelize.define('Notification', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
+    primaryKey: true,
   },
   userId: {
     type: DataTypes.UUID,
-    allowNull: false
+    allowNull: false,
   },
   title: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   message: {
-    type: DataTypes.TEXT
+    type: DataTypes.TEXT,
   },
   type: {
     type: DataTypes.STRING,
-    defaultValue: 'system'
+    defaultValue: 'system',
   },
   is_read: {
     type: DataTypes.BOOLEAN,
-    defaultValue: false
-  }
+    defaultValue: false,
+  },
 });
 
 module.exports = Notification;

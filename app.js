@@ -27,11 +27,13 @@ const PORT = process.env.PORT || 3000;
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'aktiv-secret-key',
-  resave: false,
-  saveUninitialized: true
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'aktiv-secret-key',
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
 app.use(async (req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -39,7 +41,9 @@ app.use(async (req, res, next) => {
   if (req.session.user) {
     try {
       res.locals.unreadCount = await Notification.count({ where: { userId: req.session.user.id, is_read: false } });
-    } catch (e) { res.locals.unreadCount = 0; }
+    } catch (e) {
+      res.locals.unreadCount = 0;
+    }
   } else {
     res.locals.unreadCount = 0;
   }
@@ -58,10 +62,13 @@ app.get('/chat/:enrollmentId', async (req, res) => {
   try {
     const enrollment = await Enrollment.findOne({
       where: { id: req.params.enrollmentId },
-      include: [Quest, User]
+      include: [Quest, User],
     });
     if (!enrollment) return res.status(404).render('pages/404', { title: 'Чат не найден' });
-    const messages = await ChatMessage.findAll({ where: { enrollmentId: enrollment.id }, order: [['createdAt', 'ASC']] });
+    const messages = await ChatMessage.findAll({
+      where: { enrollmentId: enrollment.id },
+      order: [['createdAt', 'ASC']],
+    });
     res.render('pages/chat', { title: 'Чат Актив', enrollment, messages });
   } catch (err) {
     res.redirect('/my-quests');
@@ -71,7 +78,12 @@ app.get('/chat/:enrollmentId', async (req, res) => {
 app.post('/chat/:enrollmentId/send', async (req, res) => {
   if (!req.session.user) return res.status(401).send('Unauthorized');
   const { message } = req.body;
-  await ChatMessage.create({ enrollmentId: req.params.enrollmentId, senderId: req.session.user.id, senderRole: req.session.user.role, message });
+  await ChatMessage.create({
+    enrollmentId: req.params.enrollmentId,
+    senderId: req.session.user.id,
+    senderRole: req.session.user.role,
+    message,
+  });
   res.redirect(`/chat/${req.params.enrollmentId}`);
 });
 
@@ -99,7 +111,12 @@ app.post('/auth/register', async (req, res) => {
   const { name, email, password, role } = req.body;
   const user = await User.create({ name, email, password, role, balance: 5000 });
   req.session.user = user;
-  await Notification.create({ userId: user.id, title: 'Добро пожаловать!', message: 'Начните свое первое испытание!', type: 'system' });
+  await Notification.create({
+    userId: user.id,
+    title: 'Добро пожаловать!',
+    message: 'Начните свое первое испытание!',
+    type: 'system',
+  });
   res.redirect(role === 'expert' ? '/expert/dashboard' : '/my-quests');
 });
 
@@ -129,14 +146,14 @@ app.get('/checkout/:id', async (req, res) => {
     if (!quest) return res.status(404).render('pages/404', { title: 'Квест не найден' });
     const existing = await Enrollment.findOne({ where: { userId: req.session.user.id, questId: quest.id } });
     if (existing) return res.redirect('/my-quests?info=already_enrolled');
-    
+
     await Enrollment.create({ userId: req.session.user.id, questId: quest.id, status: 'active', is_paid: true });
-    
-    await Notification.create({ 
-      userId: req.session.user.id, 
-      title: quest.price > 0 ? 'Квест оплачен!' : 'Квест начат!', 
-      message: `Вы успешно начали квест "${quest.title}".`, 
-      type: 'system' 
+
+    await Notification.create({
+      userId: req.session.user.id,
+      title: quest.price > 0 ? 'Квест оплачен!' : 'Квест начат!',
+      message: `Вы успешно начали квест "${quest.title}".`,
+      type: 'system',
     });
 
     if (quest.price > 0) {
@@ -162,15 +179,25 @@ app.get('/my-quests', async (req, res) => {
 
 app.get('/quest-dashboard/:id', async (req, res) => {
   if (!req.session.user) return res.redirect('/auth');
-  const enrollment = await Enrollment.findOne({ where: { id: req.params.id, userId: req.session.user.id }, include: [Quest] });
+  const enrollment = await Enrollment.findOne({
+    where: { id: req.params.id, userId: req.session.user.id },
+    include: [Quest],
+  });
   if (!enrollment) return res.status(404).render('pages/404', { title: 'Квест не найден' });
   const task = await Task.findOne({ where: { questId: enrollment.questId, day_number: enrollment.progress_days + 1 } });
-  res.render('pages/quest-dashboard', { title: enrollment.Quest.title, enrollment, task: task || { title: 'Отдых', description: 'На сегодня заданий нет.' } });
+  res.render('pages/quest-dashboard', {
+    title: enrollment.Quest.title,
+    enrollment,
+    task: task || { title: 'Отдых', description: 'На сегодня заданий нет.' },
+  });
 });
 
 app.post('/quest-checkin/:id', async (req, res) => {
   if (!req.session.user) return res.status(401).send('Unauthorized');
-  const enrollment = await Enrollment.findOne({ where: { id: req.params.id, userId: req.session.user.id }, include: [Quest] });
+  const enrollment = await Enrollment.findOne({
+    where: { id: req.params.id, userId: req.session.user.id },
+    include: [Quest],
+  });
   if (!enrollment) return res.status(404).send('Enrollment not found');
   const now = new Date();
   const last = enrollment.last_checkin ? new Date(enrollment.last_checkin) : null;
@@ -179,7 +206,12 @@ app.post('/quest-checkin/:id', async (req, res) => {
   enrollment.last_checkin = now;
   if (enrollment.progress_days >= enrollment.Quest.duration_days) {
     enrollment.status = 'completed';
-    await Notification.create({ userId: req.session.user.id, title: 'Квест завершен! 🏆', message: `Поздравляем! Вы завершили "${enrollment.Quest.title}".`, type: 'achievement' });
+    await Notification.create({
+      userId: req.session.user.id,
+      title: 'Квест завершен! 🏆',
+      message: `Поздравляем! Вы завершили "${enrollment.Quest.title}".`,
+      type: 'achievement',
+    });
   }
   await enrollment.save();
   const user = await User.findByPk(req.session.user.id);
@@ -191,7 +223,10 @@ app.post('/quest-checkin/:id', async (req, res) => {
 
 app.get('/notifications', async (req, res) => {
   if (!req.session.user) return res.redirect('/auth');
-  const notifications = await Notification.findAll({ where: { userId: req.session.user.id }, order: [['createdAt', 'DESC']] });
+  const notifications = await Notification.findAll({
+    where: { userId: req.session.user.id },
+    order: [['createdAt', 'DESC']],
+  });
   await Notification.update({ is_read: true }, { where: { userId: req.session.user.id, is_read: false } });
   res.render('pages/notifications', { title: 'Уведомления', notifications });
 });
@@ -204,8 +239,17 @@ app.get('/leaderboard', async (req, res) => {
 app.get('/expert/dashboard', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'expert') return res.redirect('/auth');
   const expertQuests = await Quest.findAll({ where: { creator_id: req.session.user.id } });
-  const studentCount = await Enrollment.count({ where: { questId: expertQuests.map(q => q.id) } });
-  res.render('expert/dashboard', { title: 'Панель Эксперта', stats: { students: studentCount, activeQuests: expertQuests.length, rating: req.session.user.expert_rating || '5.0', income: '128 400 ₽' }, activeQuests: expertQuests });
+  const studentCount = await Enrollment.count({ where: { questId: expertQuests.map((q) => q.id) } });
+  res.render('expert/dashboard', {
+    title: 'Панель Эксперта',
+    stats: {
+      students: studentCount,
+      activeQuests: expertQuests.length,
+      rating: req.session.user.expert_rating || '5.0',
+      income: '128 400 ₽',
+    },
+    activeQuests: expertQuests,
+  });
 });
 
 app.get('/expert/quests', async (req, res) => {
@@ -234,11 +278,27 @@ app.post('/expert/quests/save', async (req, res) => {
     await quest.update({ title, description, difficulty, reward_xp, duration_days, price, category });
     await Task.destroy({ where: { questId: quest.id } });
   } else {
-    quest = await Quest.create({ title, description, difficulty, reward_xp, duration_days, price, category, creator_id: req.session.user.id, creator_type: 'expert' });
+    quest = await Quest.create({
+      title,
+      description,
+      difficulty,
+      reward_xp,
+      duration_days,
+      price,
+      category,
+      creator_id: req.session.user.id,
+      creator_type: 'expert',
+    });
   }
   if (tasks && Array.isArray(tasks)) {
     for (let i = 0; i < tasks.length; i++) {
-      if (tasks[i].title) await Task.create({ questId: quest.id, day_number: i + 1, title: tasks[i].title, description: tasks[i].description });
+      if (tasks[i].title)
+        await Task.create({
+          questId: quest.id,
+          day_number: i + 1,
+          title: tasks[i].title,
+          description: tasks[i].description,
+        });
     }
   }
   res.redirect('/expert/quests?success=saved');
@@ -258,16 +318,74 @@ app.get('/:page', (req, res) => {
 });
 
 sequelize.sync({ alter: true }).then(async () => {
-  const [expertUser] = await User.findOrCreate({ where: { email: 'expert@aktiv.app' }, defaults: { name: 'Артем Активный', role: 'expert', password: '123', expert_sphere: 'Активное долголетие', balance: 0, verified: true } });
-  const [adminUser] = await User.findOrCreate({ where: { email: 'admin@aktiv.app' }, defaults: { name: 'Актив Админ', role: 'admin', password: 'admin', balance: 0, verified: true } });
-  
+  const [expertUser] = await User.findOrCreate({
+    where: { email: 'expert@aktiv.app' },
+    defaults: {
+      name: 'Артем Активный',
+      role: 'expert',
+      password: '123',
+      expert_sphere: 'Активное долголетие',
+      balance: 0,
+      verified: true,
+    },
+  });
+  const [adminUser] = await User.findOrCreate({
+    where: { email: 'admin@aktiv.app' },
+    defaults: { name: 'Актив Админ', role: 'admin', password: 'admin', balance: 0, verified: true },
+  });
+
   const questCount = await Quest.count();
   if (questCount < 3) {
-    const detox = await Quest.create({ title: 'Активный детокс', description: 'Полная перезагрузка системы вознаграждения мозга с Актив.', difficulty: 'hard', reward_xp: 1200, duration_days: 14, price: 2500, creator_id: expertUser.id, creator_type: 'expert', category: 'Разум' });
-    await Task.create({ questId: detox.id, day_number: 1, title: 'Полный оффлайн', description: '24 часа без интернета.' });
-    await Quest.create({ title: 'Ментальный фокус Актив', description: 'Техники глубокой концентрации в системе Актив.', difficulty: 'mid', reward_xp: 800, duration_days: 21, price: 3200, creator_id: expertUser.id, creator_type: 'expert', category: 'Разум' });
-    await Quest.create({ title: 'Марафон ранних подъемов', description: '7 дней пробуждения до 6:00. Дисциплина — залог успеха.', difficulty: 'easy', reward_xp: 400, duration_days: 7, price: 0, creator_id: adminUser.id, creator_type: 'user', category: 'Дисциплина' });
-    await Quest.create({ title: 'Книжный вызов', description: 'Читайте минимум 30 минут каждый день в течение месяца.', difficulty: 'mid', reward_xp: 1200, duration_days: 30, price: 0, creator_id: adminUser.id, creator_type: 'user', category: 'Развитие' });
+    const detox = await Quest.create({
+      title: 'Активный детокс',
+      description: 'Полная перезагрузка системы вознаграждения мозга с Актив.',
+      difficulty: 'hard',
+      reward_xp: 1200,
+      duration_days: 14,
+      price: 2500,
+      creator_id: expertUser.id,
+      creator_type: 'expert',
+      category: 'Разум',
+    });
+    await Task.create({
+      questId: detox.id,
+      day_number: 1,
+      title: 'Полный оффлайн',
+      description: '24 часа без интернета.',
+    });
+    await Quest.create({
+      title: 'Ментальный фокус Актив',
+      description: 'Техники глубокой концентрации в системе Актив.',
+      difficulty: 'mid',
+      reward_xp: 800,
+      duration_days: 21,
+      price: 3200,
+      creator_id: expertUser.id,
+      creator_type: 'expert',
+      category: 'Разум',
+    });
+    await Quest.create({
+      title: 'Марафон ранних подъемов',
+      description: '7 дней пробуждения до 6:00. Дисциплина — залог успеха.',
+      difficulty: 'easy',
+      reward_xp: 400,
+      duration_days: 7,
+      price: 0,
+      creator_id: adminUser.id,
+      creator_type: 'user',
+      category: 'Дисциплина',
+    });
+    await Quest.create({
+      title: 'Книжный вызов',
+      description: 'Читайте минимум 30 минут каждый день в течение месяца.',
+      difficulty: 'mid',
+      reward_xp: 1200,
+      duration_days: 30,
+      price: 0,
+      creator_id: adminUser.id,
+      creator_type: 'user',
+      category: 'Развитие',
+    });
   }
   app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 });

@@ -95,7 +95,7 @@ body{overflow:hidden;}
         <div class="card-title">Ваш прогресс по дням</div>
         <div class="days-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 10px; margin-bottom: 20px;">
           <% for(let i=1; i<=enrollment.Quest.duration_days; i++) { %>
-            <div class="day-cell <%= i <= enrollment.progress_days ? 'done' : i === enrollment.progress_days + 1 ? 'current' : '' %>" 
+            <div class="day-cell <%= i <= enrollment.progress_days ? 'done' : i === enrollment.progress_days + 1 ? 'current' : '' %>"
                  style="height: 40px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; transition: all 0.3s;
                  <%= i <= enrollment.progress_days ? 'background: rgba(110,231,160,0.15); color: var(--green); border-color: var(--green);' : i === enrollment.progress_days + 1 ? 'background: var(--pink-soft); color: var(--pink); border-color: var(--pink);' : 'color: var(--text3);' %>">
               <%= i %>
@@ -206,7 +206,6 @@ body{overflow:hidden;}
         progText.textContent = `День ${data.progress} из ${data.total}`;
         progFill.style.width = Math.round((data.progress / data.total) * 100) + '%';
 
-        // Refresh grid
         const cells = document.querySelectorAll('.day-cell');
         cells.forEach((cell, idx) => {
           const dayNum = idx + 1;
